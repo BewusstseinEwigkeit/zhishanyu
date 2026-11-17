@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>至善鱼 · 校园通知助手</title>
+<meta name="description" content="至善鱼把校园通知里的「要做什么、什么时候截止」拆出来，你核对一遍，它到点提醒到你的 QQ。">
+<meta property="og:title" content="至善鱼 · 校园通知助手">
+<meta property="og:description" content="粘贴通知 → 抽出截止时间 → 人工核对 → 到点提醒。数据存本机，大模型可选。">
+<meta property="og:image" content="assets/shot-start.png">
+<link rel="icon" href="assets/app-icon-32.png">
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--ink:#17223a;--muted:#5b6880;--faint:#8a95a8;--line:#e2e8f1;--navy:#2f5193;--navy-d:#243f74;--mint:#2f9e7f;--mint-bg:#e7f6f0;--amber:#a86a12;--amber-bg:#fdf3e2;--r:18px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 -apple-system,"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--navy)}
+.serif{font-family:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",serif}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+nav{position:sticky;top:0;z-index:5;background:rgba(244,247,251,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--ink);text-decoration:none}
+.brand img{width:30px;height:30px;border-radius:50%}
+nav .links{margin-left:auto;display:flex;gap:18px;font-size:14px}
+nav .links a{color:var(--muted);text-decoration:none}
+nav .links a:hover{color:var(--navy)}
+.hero{padding:72px 0 40px}
+.hero .wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:32px;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.12em;color:var(--navy);font-weight:600}
+h1{font-size:46px;line-height:1.25;margin:12px 0 18px;font-weight:700}
+h1 em{font-style:normal;color:var(--navy)}
+.lead{font-size:18px;color:var(--muted);max-width:34em;margin:0 0 28px}
+.btns{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:12px;font-weight:600;text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.primary:hover{background:var(--navy-d)}
+.btn:hover{border-color:var(--navy)}
+.hero img.mascot{width:100%;max-width:340px;justify-self:center;filter:drop-shadow(0 18px 40px rgba(47,81,147,.18))}
+.note{font-size:13px;color:var(--faint);margin-top:14px}
+section{padding:56px 0}
+h2{font-size:30px;margin:0 0 8px}
+.sub{color:var(--muted);margin:0 0 30px}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;counter-reset:s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 22px 20px;box-shadow:0 10px 30px rgba(23,34,58,.04)}
+.steps .card::before{counter-increment:s;content:"0" counter(s);display:block;font:600 13px/1 ui-monospace,Consolas,monospace;color:var(--navy);margin-bottom:10px}
+.card h3{margin:0 0 6px;font-size:17px}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.shots{display:grid;gap:44px}
+.shot{display:grid;grid-template-columns:1fr 1.9fr;gap:32px;align-items:center}
+.shot:nth-child(even){grid-template-columns:1.9fr 1fr}
+.shot:nth-child(even) figcaption{order:2}
+.shot img{width:100%;border-radius:14px;border:1px solid var(--line);box-shadow:0 20px 50px rgba(23,34,58,.10);display:block}
+.shot figcaption h3{margin:0 0 8px;font-size:20px}
+.shot figcaption p{margin:0;color:var(--muted)}
+figure{margin:0}
+.demo-tag{font-size:13px;color:var(--faint)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;font-size:15px}
+th,td{text-align:left;padding:13px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#eef2f8;font-weight:600;color:var(--ink)}
+tr:last-child td{border-bottom:0}
+td:first-child{color:var(--muted);white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+ul.clean{margin:0;padding-left:1.1em;color:var(--muted);font-size:15px}
+ul.clean li{margin:4px 0}
+.pill{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 10px;border-radius:99px;margin-bottom:10px}
+.pill.ok{background:var(--mint-bg);color:var(--mint)}
+.pill.wait{background:var(--amber-bg);color:var(--amber)}
+.get{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.get .card{padding:26px}
+.get h3{font-size:20px;margin-bottom:8px}
+.get .btn{margin-top:16px}
+.muted-box{margin-top:16px;padding:12px 14px;border-radius:12px;background:#f1f4f9;color:var(--muted);font-size:14px}
+code{font:13.5px ui-monospace,Consolas,monospace;background:#eef2f8;padding:1px 6px;border-radius:6px}
+footer{padding:36px 0 48px;color:var(--faint);font-size:13.5px;border-top:1px solid var(--line);margin-top:24px}
+@media (max-width:860px){
+ .hero .wrap,.shot,.shot:nth-child(even),.grid2,.get{grid-template-columns:1fr}
+ .shot:nth-child(even) figcaption{order:0}
+ .steps{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ table{display:block;overflow-x:auto}
+ h1{font-size:34px}
+ .hero img.mascot{max-width:220px;order:-1}
+ nav .links{display:none}
+ td:first-child{white-space:normal}
+}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+ <a class="brand" href="#top"><img src="assets/mascot-head-128.webp" alt="">至善鱼</a>
+ <div class="links"><a href="#how">怎么用</a><a href="#screens">界面</a><a href="#start">上手</a><a href="#privacy">数据与隐私</a><a href="#status">进度</a><a href="#download">获取</a></div>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+ <div>
+  <div class="eyebrow">东南大学新生 AI 创客大赛作品 · 院事通@至善鱼</div>
+  <h1 class="serif">校园通知太多？<br><em>截止时间交给它盯。</em></h1>
+  <p class="lead">至善鱼把教务处、学院和群里的通知拆成「要做什么、什么时候截止」，你核对一遍再存，到点前推送到你的 QQ。没有大模型也能用，数据默认只在你自己的电脑上。</p>
+  <div class="btns">
+   <a class="btn primary" href="https://wbapp-an5j2eudlx23djngpnnpkn.app.workbuddy.host/?sharecode=UPAHTNXIUW" target="_blank" rel="noopener">在线试用（网页版）↗</a>
+   <a class="btn" href="#download">下载 Windows 版</a>
+  </div>
+  <p class="note">网页版是免登录试用档：不用注册，打开就能管事项；不含 QQ 推送和截止提醒。</p>
+ </div>
+ <img class="mascot" src="assets/mascot-512.webp" alt="至善鱼的看板形象：抱着信封的蓝发女孩">
+</div></header>
+
+<section id="how"><div class="wrap">
+ <h2 class="serif">一条通知，四步变成提醒</h2>
+ <p class="sub">核心原则：程序只给候选，写进事项库的永远是你亲手确认过的内容。</p>
+ <div class="steps">
+  <div class="card"><h3>粘贴或载入</h3><p>粘一段通知原文，或从 seu.wiki、教务处公开页面、你自己添加的 RSS 订阅里点一条载入。</p></div>
+  <div class="card"><h3>抽出日期</h3><p>规则先读一遍日期、时间、地点和是否截止；配了模型会再读一遍，专门处理「下周三前」这类说法。</p></div>
+  <div class="card"><h3>你来核对</h3><p>确认页标明每个日期是规则读的还是模型读的，两边不一致会直接标出来，确认后才入库。</p></div>
+  <div class="card"><h3>到点提醒</h3><p>截止前 24 小时和 2 小时各推一次到 QQ；也能导出 .ics，加进手机系统日历。</p></div>
+ </div>
+</div></section>
+
+<section id="screens"><div class="wrap">
+ <h2 class="serif">界面一览</h2>
+ <p class="sub demo-tag">截图均为演示数据，不是真实同学的通知。</p>
+ <div class="shots">
+  <figure class="shot"><figcaption><h3>使用指引</h3><p>第一次打开的三步引导：记下第一件事、登录 DeepSeek 账号、接上 QQ 提醒。后两步都能跳过，跳过的部分就先不工作。</p></figcaption><img src="assets/shot-start.png" alt="使用指引页面截图" loading="lazy"></figure>
+  <figure class="shot"><figcaption><h3>校园通知与事项库</h3><p>左边贴原文、解析，核对后确认入库。事项库支持全文搜索；事情做完点「做完了」，不再提醒，数据仍保留。底部可导出日历和本机备份。</p></figcaption><img src="assets/shot-notices.png" alt="校园通知页面截图" loading="lazy"></figure>
+  <figure class="shot"><figcaption><h3>AI 助手</h3><p>扫码登录 DeepSeek 账号即可启用对话和智能提取日期，不用自己申请 API 密钥；也可以填其他兼容接口。名字和说话风格都能改。</p></figcaption><img src="assets/shot-studio.png" alt="AI 助手页面截图" loading="lazy"></figure>
+ </div>
+</div></section>
+
+<section id="start"><div class="wrap">
+ <h2 class="serif">上手：选一种用法</h2>
+ <p class="sub">两个版本是同一套代码，能力边界不同。</p>
+ <table>
+  <tr><th></th><th>桌面版（Windows 便携包）</th><th>在线网页版</th></tr>
+  <tr><td>怎么用</td><td>下载一个 exe，双击运行，免安装</td><td>浏览器打开，手机也能用</td></tr>
+  <tr><td>数据在哪</td><td>你自己的电脑：<code>%LOCALAPPDATA%\Zhishanyu</code></td><td>服务端按浏览器分档保存；换浏览器或清浏览器数据就找不回，记得导出备份</td></tr>
+  <tr><td>QQ 推送、截止提醒</td><td>有</td><td>没有</td></tr>
+  <tr><td>大模型</td><td>可选：扫码登录 DeepSeek 账号，或填 OpenAI 兼容接口密钥</td><td>浏览器侧调用云端模型</td></tr>
+ </table>
+
+ <div class="grid2" style="margin-top:24px">
+  <div class="card" id="qq">
+   <h3>接 QQ：两条路选一条</h3>
+   <ul class="clean">
+    <li><b>官方机器人</b>：在 q.qq.com 创建机器人，把 AppID 和 AppSecret 填进「QQ 提醒」页。默认用长连接，不需要公网地址。只能单聊，平台主动消息额度很小。</li>
+    <li><b>小号 QQ（NapCat）</b>：私聊、群聊都能发，不受官方额度限制；属于非官方协议，账号有被风控的可能，建议用不常用的小号、只做低频提醒。</li>
+    <li>两条通道共用同一套订阅规则和去重记录；都没配置时不会发出任何消息。</li>
+   </ul>
+  </div>
+  <div class="card" id="assistant">
+   <h3>助手的名字和口吻</h3>
+   <ul class="clean">
+    <li>在「AI 助手」里一句话描述想要的样子，先出草案，你确认后才生效。</li>
+    <li>人设库可导入 <code>.md</code> / <code>.txt</code> 提示词，分别绑定到两条 QQ 通道；通知正文不会被改写。</li>
+    <li>不连模型时走本地规则和模板，界面会写明「这条是规则答的」。</li>
+   </ul>
+  </div>
+ </div>
+</div></section>
+
+<section id="privacy"><div class="wrap">
+ <h2 class="serif">数据与隐私</h2>
+ <p class="sub">桌面版的设计前提是「只给你自己用」。</p>
+ <div class="grid2">
+  <div class="card"><h3>存在哪</h3><ul class="clean">
+   <li>事项库、设置、备份都在本机目录，桌面服务只监听本机回环地址。</li>
+   <li>模型密钥和 QQ 凭据加密保存在本机，与这台电脑绑定，不进备份文件。</li>
+   <li>校园通知只读公开页面和你自己添加的公开订阅，不登录任何校内系统。</li>
+  </ul></div>
+  <div class="card"><h3>读什么、不读什么</h3><ul class="clean">
+   <li>默认不处理任何 QQ 消息；开启后只处理白名单里实时到达的消息，不读历史。</li>
+   <li>群消息里提到截止时间的，只记成本机「候选」，你核对后才转成事项。</li>
+   <li>平台报错原样显示，发送失败不会显示成「已发送」。</li>
+  </ul></div>
+ </div>
+</div></section>
+
+<section id="status"><div class="wrap">
+ <h2 class="serif">目前做到哪了</h2>
+ <p class="sub">按实际验证结果写，没验证过的不写成已完成。</p>
+ <div class="grid2">
+  <div class="card"><span class="pill ok">已实现</span><ul class="clean">
+   <li>通知解析、人工核对、事项库、全文搜索、备份与恢复</li>
+   <li>seu.wiki 与教务处公开通知抓取，自定义 RSS/Atom 订阅</li>
+   <li>DeepSeek 账号扫码登录（桌面版真机走通）</li>
+   <li>Windows 便携包打包与启动</li>
+   <li>导出 .ics 到手机日历</li>
+  </ul></div>
+  <div class="card"><span class="pill wait">还没做到 / 有限制</span><ul class="clean">
+   <li>QQ 官方机器人还没用真实凭据完成一次真实送达</li>
+   <li>在线网页版目前是免登录试用档，不能跨设备同步，还不算正式上线</li>
+   <li>便携包没有代码签名，首次运行会弹 SmartScreen，点「更多信息 → 仍要运行」</li>
+   <li>没有自动更新</li>
+  </ul></div>
+ </div>
+</div></section>
+
+<section id="download"><div class="wrap">
+ <h2 class="serif">获取</h2>
+ <p class="sub">想先看看，用网页版；要 QQ 提醒，用桌面版。</p>
+ <div class="get">
+  <div class="card"><h3>在线网页版</h3><p class="sub" style="margin:0">打开即用，不用注册。适合先体验通知解析和事项管理。</p>
+   <a class="btn primary" href="https://wbapp-an5j2eudlx23djngpnnpkn.app.workbuddy.host/?sharecode=UPAHTNXIUW" target="_blank" rel="noopener">打开网页版 ↗</a></div>
+  <div class="card"><h3>Windows 桌面版</h3><p class="sub" style="margin:0">单文件便携包，约 106 MB，Windows x64。放到不会被清理的目录再运行。</p>
+   <!-- DOWNLOAD:START -->
+   <div class="muted-box">下载地址整理中，开放后会放在这里。</div>
+   <!-- DOWNLOAD:END -->
+  </div>
+ </div>
+</div></section>
+
+<footer><div class="wrap">
+ 至善鱼 · 东南大学新生 AI 创客大赛「院事通@至善鱼」作品 · © 2026 BewusstseinEwigkeit<br>
+ 本页为公开介绍页；项目源码仓库暂未公开。
+</div></footer>
+</body>
+</html>
